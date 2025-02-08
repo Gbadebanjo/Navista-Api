@@ -1,15 +1,13 @@
-import { Model } from 'mongoose';
-
 // User interface
-export type IUser = {
-  _id: string;
-  name: string;
-  email: string;
-  role: 'user';
-  password: string;
-  passwordConfirm: string | undefined;
-  passwordChangedAt?: Date;
-};
+// export type IUser = {
+//   _id: string;
+//   name: string;
+//   email: string;
+//   role: 'user';
+//   password: string;
+//   passwordConfirm: string | undefined;
+//   passwordChangedAt?: Date;
+// };
 
 export type ILoginUser = {
   email: string;
@@ -28,11 +26,24 @@ export type IRefreshTokenResponse = {
   accessToken: string;
 };
 
-// The IUserModel interface combines the Model interface with custom methods
-export type IUserModel = Model<IUser> & {
-  // Method to check if a user exists by email
-  isUserExist(email: string): Promise<Pick<IUser, '_id' | 'name' | 'email' | 'role' | 'password'>>;
+export type IUser = {
+  id: string; // UUID from Supabase Auth
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number?: string;
 
-  // Method to check if a given password matches the saved password
-  isPasswordMatched(givenPassword: string, savedPassword: string): Promise<boolean>;
+  created_at?: Date;
+};
+
+export type IEligibilityAssessMent = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  nationality: string;
+  current_location: string;
+  education_level: string;
+  created_at: Date;
+  updated_at: Date;
 };
