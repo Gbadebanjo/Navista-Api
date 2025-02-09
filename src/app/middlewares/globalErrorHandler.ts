@@ -8,7 +8,6 @@ import { ZodError } from 'zod';
 import handleValidationError from '../../error/HandleValidationError';
 import handleZodError from '../../error/handleZodError';
 import handleCastError from '../../error/handleCastError';
-import HandleMongoServerError from '../../error/HandleMongooseServerError';
 import { IGenericErrorMessage } from './../../interface/error';
 
 const isDevelopment = config.env === 'development';
@@ -30,8 +29,6 @@ const handleSpecificErrors = (error: any) => {
     ({ statusCode, message, errorMessage } = handleZodError(error));
   } else if (error.name === 'ValidationError') {
     ({ statusCode, message, errorMessage } = handleValidationError(error));
-  } else if (error.name === 'MongoServerError') {
-    ({ statusCode, message, errorMessage } = HandleMongoServerError(error));
   } else if (error.name === 'CastError') {
     ({ statusCode, message, errorMessage } = handleCastError(error));
   } else if (error instanceof ApiError) {

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Server } from 'http';
-import mongoose from 'mongoose';
 import config from './config';
 import app from './app';
 
@@ -13,9 +12,6 @@ let server: Server;
 
 async function initializeDbConnection() {
   try {
-    await mongoose.connect(config.database_url as string);
-    console.info(`Database connection successful`);
-
     app.listen(config.port, () => {
       console.info(`Application listening on port ${config.port}`);
     });
