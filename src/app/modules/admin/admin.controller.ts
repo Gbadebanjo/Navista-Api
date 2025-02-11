@@ -12,8 +12,8 @@ export const getAllUsers = catchAsync(async (req, res) => {
 export const getAUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await supabase.from('profiles').select('*').eq('id', id);
-  const users = await supabase.auth.admin.listUsers();
-  console.log(users);
+  // const users = await supabase.auth.admin.listUsers();
+  // console.log(users);
   res.status(user.status).json({
     status: user.statusText,
     data: user.data,
