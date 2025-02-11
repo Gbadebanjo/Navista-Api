@@ -47,3 +47,56 @@ export type IEligibilityAssessMent = {
   created_at: Date;
   updated_at: Date;
 };
+
+export type IUserProfile = {
+  personalInfo: {
+    name: string;
+    age: number;
+    nationality: string;
+    location: string;
+    email: string;
+  };
+  professionalBg: {
+    industry: string;
+    jobTitle: string;
+    experience: number;
+    achievements: {
+      type: string;
+      description: string;
+    }[];
+  };
+  educationalQualification: {
+    degreeLevel: string;
+    institution: string;
+    areaOfStudy: string;
+  };
+
+  achievementsAndRecognitions: {
+    awards: {
+      title: string;
+      year: number;
+      description: string;
+    }[];
+    certifications: {
+      title: string;
+      year: number;
+      description: string;
+    }[];
+
+    publishedWorks: {
+      title: string;
+      year: number;
+      description: string;
+    }[];
+  };
+
+  preferences: {
+    targetCountry: string;
+    urgency: string;
+    careerGoals: string;
+  };
+
+  currentImmigrationStatus: {
+    existingVisas: string;
+  };
+};

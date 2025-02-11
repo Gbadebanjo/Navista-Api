@@ -16,5 +16,6 @@ export default {
   supabase: {
     url: process.env.SUPERBASE_DATABASE_URL,
     key: process.env.SUPERBASE_DATABASE_KEY,
+    admin_key: process.env.SUPERBASE_ADMIN_KEY,
   },
 };
