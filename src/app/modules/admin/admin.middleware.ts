@@ -27,6 +27,10 @@ const authorize =
           throw new ApiError(httpStatus.FORBIDDEN, 'Insufficient permissions');
         }
 
+        if (verifiedUser.role !== 'admin') {
+          throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized');
+        }
+
         // Attach the verified user payload to the request object
         const decodedUser = await supabase.from('profiles').select('*').eq('id', verifiedUser.id);
 

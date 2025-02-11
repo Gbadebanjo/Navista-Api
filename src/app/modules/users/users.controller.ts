@@ -3,7 +3,7 @@ import catchAsync from '../../../interface/catchAsync';
 // import ApiError from '../../../error/ApiError';
 import config from '../../../config';
 
-import { ILoginUserResponse } from './users.interface';
+import { ILoginUserResponse } from '../interfaces/users';
 // import httpStatus from 'http-status';
 import sendResponse from '../../../common/sendResponse';
 import { jwtHelper } from '../../../common/jwtHelper';
