@@ -48,13 +48,11 @@ export type IEligibilityAssessMent = {
   updated_at: Date;
 };
 
-export type IUserProfile = {
+export type IEligibilityAssessment = {
   personalInfo: {
-    name: string;
     age: number;
     nationality: string;
     location: string;
-    email: string;
   };
   professionalBg: {
     industry: string;
@@ -64,6 +62,11 @@ export type IUserProfile = {
       type: string;
       description: string;
     }[];
+    leadership: {
+      title: string;
+      year: number;
+      description: string;
+    };
   };
   educationalQualification: {
     degreeLevel: string;
@@ -77,11 +80,11 @@ export type IUserProfile = {
       year: number;
       description: string;
     }[];
-    certifications: {
-      title: string;
-      year: number;
-      description: string;
-    }[];
+    // certifications: {
+    //   title: string;
+    //   year: number;
+    //   description: string;
+    // }[];
 
     publishedWorks: {
       title: string;
@@ -93,10 +96,23 @@ export type IUserProfile = {
   preferences: {
     targetCountry: string;
     urgency: string;
-    careerGoals: string;
+    relocationGoal: string;
   };
 
   currentImmigrationStatus: {
     existingVisas: string;
+    mainRelocationGoal: string;
   };
+};
+export type EligibilityModel = {
+  id: string;
+  user_id: string;
+  assessment: IEligibilityAssessment;
+  created_at: Date;
+  updated_at: Date;
+  // score:
+};
+
+export type IUserProfile = {
+  id: string;
 };

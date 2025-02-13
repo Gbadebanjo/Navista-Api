@@ -16,6 +16,11 @@ export default {
   supabase: {
     url: process.env.SUPERBASE_DATABASE_URL,
     key: process.env.SUPERBASE_DATABASE_KEY,
-    admin_key: process.env.SUPERBASE_ADMIN_KEY,
+    admin_key: process.env.SUPERBASE_SERVICE_ROLE_KEY,
+  },
+  mail: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+    from: process.env.FROM_NAME,
   },
 };
