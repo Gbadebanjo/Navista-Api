@@ -69,7 +69,7 @@ export const createAdmin = catchAsync(async (req, res) => {
 
   const { data, error } = await supabaseAdmin.auth.signUp({
     email,
-    password: passwdEncrypt,
+    password: password,
     options: {
       data: {
         first_name,
@@ -157,3 +157,23 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
 });
 
 export const createVisa = catchAsync;
+
+export const clientAdminLogin = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  const admin = await supabase.auth.signUp;
+
+  console.log(data, error);
+
+  if (error) return res.status(401).json({ error: error.message });
+
+  return res.status(200).json({
+    status: 'success',
+    data: data,
+  });
+});

@@ -2,8 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../../error/ApiError';
 // import { jwtHelper } from '../../common/jwtHelper';
-import { supabase } from '../../../config/supabase.config';
-import { jwtHelper } from '../../../common/jwtHelper';
+import { supabase, supabaseAdmin } from '../../../config/supabase.config';
 
 const authorize =
   (...requiredRoles: string[]) =>
@@ -13,37 +12,70 @@ const authorize =
       const authorizationHeader = req.headers.authorization;
 
       if (!authorizationHeader) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid authorization token');
+        console.log('No authorization header');
+        return res.status(httpStatus.UNAUTHORIZED).json({
+          success: false,
+          message: 'You are not authorized',
+        });
       }
 
       const token = authorizationHeader.replace('Bearer ', '');
 
       try {
         // Verify the token
-        const verifiedUser = jwtHelper.verifyToken(token);
+        const getUser = await supabase.auth.getUser(token);
+        if (getUser.error) {
+          return res.status(httpStatus.UNAUTHORIZED).json({
+            success: false,
+            message: getUser.error.message,
+          });
+        }
+
+        console.log(getUser);
+
+        const { data, error } = await supabaseAdmin
+          .from('client_admins')
+          .select('*')
+          .eq('email', getUser.data.user.email);
+
+        console.log(data);
+
+        if (error) {
+          return res.status(httpStatus.UNAUTHORIZED).json({
+            success: false,
+            message: error.message,
+          });
+        }
 
         // Check if required roles are specified and verify user's role
-        if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
-          throw new ApiError(httpStatus.FORBIDDEN, 'Insufficient permissions');
+        if (requiredRoles.length && !requiredRoles.includes(data[0].role)) {
+          console.log('Insufficient permissions');
+          return res.status(httpStatus.FORBIDDEN).json({
+            success: false,
+            message: 'Insufficient permissions',
+          });
         }
 
-        if (verifiedUser.role !== 'admin') {
-          throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized');
+        if (data[0].role !== 'client_admin') {
+          console.log('You are not authorized');
+          return res.status(httpStatus.FORBIDDEN).json({
+            success: false,
+            message: 'You are not authorized',
+          });
         }
 
-        // Attach the verified user payload to the request object
-        const decodedUser = await supabase.from('profiles').select('*').eq('id', verifiedUser.id);
-
-        if (!decodedUser) {
-          throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
-        }
         // console.log(decodedUser);
-        req.body.user = decodedUser;
+        req.body.user = data[0];
         next();
       } catch (error) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+        console.log('You are not authorized, catch 1', error);
+        return res.status(httpStatus.UNAUTHORIZED).json({
+          success: false,
+          message: 'You are not authorized',
+        });
       }
     } catch (error) {
+      console.log('You are not authorized, catch', error);
       next(error);
     }
   };

@@ -4,6 +4,8 @@ class ApiError extends Error {
   constructor(statusCode: number, message: string | undefined, stack = '') {
     super(message);
     this.statusCode = statusCode;
+
+    console.log('ApiError', message);
     if (stack) {
       this.stack = stack;
     } else {

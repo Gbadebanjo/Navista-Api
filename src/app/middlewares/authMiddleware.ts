@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../error/ApiError';
-import { User } from '../modules/users/users.model';
 import { jwtHelper } from '../../common/jwtHelper';
 
 const authMiddleware =
@@ -27,7 +26,11 @@ const authMiddleware =
         }
 
         // Attach the verified user payload to the request object
-        const decodedUser = await User.findOne({ _id: verifiedUser.id });
+        const decodedUser = {
+          id: verifiedUser.id,
+          email: verifiedUser.email,
+          role: verifiedUser.role,
+        };
         // console.log(decodedUser);
         req.body.user = decodedUser;
         next();

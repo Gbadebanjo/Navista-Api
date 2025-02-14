@@ -46,6 +46,8 @@ const handleSpecificErrors = (error: any) => {
 const globalErrorHandler: ErrorRequestHandler = (error: any, req: Request, res: Response) => {
   logError(error);
 
+  console.log('LOGGING ERROR', error);
+
   const { statusCode, message, errorMessage } = handleSpecificErrors(error);
 
   res.status(statusCode).json({
