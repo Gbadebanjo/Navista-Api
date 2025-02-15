@@ -1,10 +1,10 @@
 {
-  "name": "express-boilerplate-starter",
+  "name": "navisa-api",
   "version": "1.0.8",
   "description": "",
   "main": "dist/server.js",
   "bin": {
-    "express-boilerplate-starter": "./bin/script.js"
+    "navisa-api": "./bin/script.js"
   },
   "scripts": {
     "dev": "nodemon src/server.ts",

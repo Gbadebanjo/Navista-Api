@@ -106,6 +106,21 @@ export const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
+export const createSuperAdmin = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  const { data, error } = await supabaseAdmin.from('super_admins').insert({
+    email,
+  });
+
+  if (error) return res.status(401).json({ success: false, error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
 export const assignClientToAdmin = catchAsync(async (req, res) => {
   const { client_id, admin_id } = req.body;
   const { data, error } = await supabaseAdmin.from('client_admins').select('*').eq('id', admin_id);
@@ -158,7 +173,7 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
 
 export const createVisa = catchAsync;
 
-export const clientAdminLogin = catchAsync(async (req, res) => {
+export const adminLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -166,14 +181,99 @@ export const clientAdminLogin = catchAsync(async (req, res) => {
     password,
   });
 
-  const admin = await supabase.auth.signUp;
-
   console.log(data, error);
 
   if (error) return res.status(401).json({ error: error.message });
 
   return res.status(200).json({
     status: 'success',
-    data: data,
+    data: { user: data.user.user_metadata, token: data.session.access_token },
+  });
+});
+
+export const getAllAdminClients = catchAsync(async (req, res) => {
+  const adminDetail = req.body.user;
+
+  const clientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', adminDetail.email);
+
+  const clients = await supabaseAdmin
+    .from('client_admin_assignments')
+    .select('*')
+    .eq('client_admin_id', clientAdmin.data[0].id);
+
+  if (clients.data.length === 0) {
+    return res.status(404).json({ error: 'No clients found for this admin' });
+  }
+
+  const clientDetails = await Promise.all(
+    clients.data[0].users_assigned.map(async (clientId) => {
+      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
+      return client.data[0];
+    })
+  );
+
+  res.status(clients.status).json({
+    status: clients.statusText,
+    data: clientDetails,
+  });
+});
+
+export const getAnAdminClient = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const adminDetail = req.body.user;
+
+  const clientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', adminDetail.email);
+
+  const clients = await supabaseAdmin
+    .from('client_admin_assignments')
+    .select('*')
+    .eq('client_admin_id', clientAdmin.data[0].id);
+
+  if (clients.data.length === 0) {
+    return res.status(404).json({ error: 'No clients found for this admin' });
+  }
+
+  const clientDetails = await Promise.all(
+    clients.data[0].users_assigned.map(async (clientId) => {
+      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
+      return client.data[0];
+    })
+  );
+
+  const client = clientDetails.find((client) => client.id === id);
+
+  if (!client) return res.status(404).json({ error: 'Client not found' });
+
+  res.status(200).json({
+    status: 'success',
+    data: client,
+  });
+});
+
+export const getAllAdminsWithClients = catchAsync(async (req, res) => {
+  const admins = await supabaseAdmin.from('client_admins').select('*');
+
+  const adminsClients = await Promise.all(
+    admins.data.map(async (admin) => {
+      const clients = await supabaseAdmin.from('client_admin_assignments').select('*').eq('client_admin_id', admin.id);
+
+      if (clients.data.length === 0) {
+        return { ...admin, clients: [] };
+      }
+
+      const clientDetails = await Promise.all(
+        clients.data[0].users_assigned.map(async (clientId) => {
+          const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
+          return client.data[0];
+        })
+      );
+
+      return { ...admin, clients: clientDetails };
+    })
+  );
+
+  res.status(admins.status).json({
+    status: admins.statusText,
+    data: adminsClients,
   });
 });

@@ -1,25 +1,36 @@
 import express from 'express';
 import * as AdminController from './admin.controller';
 import authorize from './admin.middleware';
+import SuperAdminAuthorize from './super.admin.middleware';
 // import authorize from './admin.middleware';
 
-const router = express.Router();
+const clientAdminRouter = express.Router();
+const supaAdminRouter = express.Router();
 
 // router.use(authorize('admin')); //Admin Middleware  to be  used when admin signup and signin
 
-router.post('/client-admin/login', AdminController.clientAdminLogin);
+clientAdminRouter.post('/login', AdminController.adminLogin);
 
-// router.use(authorize('client_admin'));
+clientAdminRouter.use(authorize('client_admin'));
 
-router.get('/all', AdminController.getAllUsers);
-router.get('/client-admins/all', AdminController.getClientAdmins);
-router.get('/client-admins/:id', AdminController.getAClientAdmin);
-router.delete('/client-admins/:id', AdminController.deleteClientAdmin);
+clientAdminRouter.get('/clients/all', AdminController.getAllAdminClients);
+clientAdminRouter.get('/clients/:id', AdminController.getAnAdminClient);
 
-router.get('/:id', AdminController.getAUser);
-router.post('/create-admin', AdminController.createAdmin);
-router.post('/assign-client', AdminController.assignClientToAdmin);
+supaAdminRouter.post('/login', AdminController.adminLogin);
 
-router.delete('/:id', AdminController.deleteUser);
-export default router;
+supaAdminRouter.use(SuperAdminAuthorize('super_admin'));
+supaAdminRouter.get('/all', AdminController.getAllUsers);
+supaAdminRouter.get('/client-admins/all', AdminController.getClientAdmins);
+supaAdminRouter.get('/client-admins/:id', AdminController.getAClientAdmin);
+supaAdminRouter.delete('/client-admins/:id', AdminController.deleteClientAdmin);
+
+supaAdminRouter.get('/:id', AdminController.getAUser);
+supaAdminRouter.post('/create-super-admin', AdminController.createSuperAdmin);
+supaAdminRouter.get('/clients-and-admins/all', AdminController.getAllAdminsWithClients);
+supaAdminRouter.post('/create-admin', AdminController.createAdmin);
+supaAdminRouter.post('/assign-client', AdminController.assignClientToAdmin);
+
+supaAdminRouter.delete('/:id', AdminController.deleteUser);
+
+export { clientAdminRouter, supaAdminRouter };
 //

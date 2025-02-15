@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import ApiError from '../../../error/ApiError';
 // import { jwtHelper } from '../../common/jwtHelper';
 import { supabase, supabaseAdmin } from '../../../config/supabase.config';
 
-const authorize =
+const SuperAdminAuthorize =
   (...requiredRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -24,6 +23,7 @@ const authorize =
       try {
         // Verify the token
         const getUser = await supabase.auth.getUser(token);
+
         if (getUser.error) {
           return res.status(httpStatus.UNAUTHORIZED).json({
             success: false,
@@ -34,11 +34,11 @@ const authorize =
         console.log(getUser);
 
         const { data, error } = await supabaseAdmin
-          .from('client_admins')
+          .from('super_admins')
           .select('*')
           .eq('email', getUser.data.user.email);
 
-        console.log(data, 'data');
+        console.log(data);
 
         if (error) {
           return res.status(httpStatus.UNAUTHORIZED).json({
@@ -47,22 +47,30 @@ const authorize =
           });
         }
 
-        // Check if required roles are specified and verify user's role
-        if (requiredRoles.length && !requiredRoles.includes(data[0].role)) {
-          console.log('Insufficient permissions');
-          return res.status(httpStatus.FORBIDDEN).json({
-            success: false,
-            message: 'Insufficient permissions',
-          });
-        }
-
-        if (data[0].role !== 'client_admin') {
-          console.log('You are not authorized');
-          return res.status(httpStatus.FORBIDDEN).json({
+        if (!data.length || data.length === 0) {
+          console.log('You are not authorized, You are not a super admin');
+          return res.status(httpStatus.UNAUTHORIZED).json({
             success: false,
             message: 'You are not authorized',
           });
         }
+
+        // Check if required roles are specified and verify user's role
+        // if (requiredRoles.length && !requiredRoles.includes(data[0].role)) {
+        //   console.log('Insufficient permissions');
+        //   return res.status(httpStatus.FORBIDDEN).json({
+        //     success: false,
+        //     message: 'Insufficient permissions',
+        //   });
+        // }
+
+        // if (data[0].role !== 'supabase_admin') {
+        //   console.log('You are not authorized');
+        //   return res.status(httpStatus.FORBIDDEN).json({
+        //     success: false,
+        //     message: 'You are not authorized',
+        //   });
+        // }
 
         // console.log(decodedUser);
         req.body.user = data[0];
@@ -80,4 +88,4 @@ const authorize =
     }
   };
 
-export default authorize;
+export default SuperAdminAuthorize;

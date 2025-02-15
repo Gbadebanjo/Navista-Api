@@ -17,6 +17,7 @@ export default {
     url: process.env.SUPERBASE_DATABASE_URL,
     key: process.env.SUPERBASE_DATABASE_KEY,
     admin_key: process.env.SUPERBASE_SERVICE_ROLE_KEY,
+    supa_admin_email: process.env.SUPER_ADMIN_EMAIL,
   },
   mail: {
     user: process.env.EMAIL_USER,
