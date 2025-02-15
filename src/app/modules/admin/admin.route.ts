@@ -26,6 +26,7 @@ supaAdminRouter.delete('/client-admins/:id', AdminController.deleteClientAdmin);
 
 supaAdminRouter.get('/:id', AdminController.getAUser);
 supaAdminRouter.post('/create-super-admin', AdminController.createSuperAdmin);
+supaAdminRouter.post('/remove-super-admin', AdminController.removeAsuperAdmin);
 supaAdminRouter.get('/clients-and-admins/all', AdminController.getAllAdminsWithClients);
 supaAdminRouter.post('/create-admin', AdminController.createAdmin);
 supaAdminRouter.post('/assign-client', AdminController.assignClientToAdmin);

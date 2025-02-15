@@ -121,6 +121,18 @@ export const createSuperAdmin = catchAsync(async (req, res) => {
   });
 });
 
+export const removeAsuperAdmin = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const { data, error } = await supabaseAdmin.from('super_admins').delete().eq('email', email);
+
+  if (error) return res.status(401).json({ success: false, error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
 export const assignClientToAdmin = catchAsync(async (req, res) => {
   const { client_id, admin_id } = req.body;
   const { data, error } = await supabaseAdmin.from('client_admins').select('*').eq('id', admin_id);
