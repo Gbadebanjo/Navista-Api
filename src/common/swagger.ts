@@ -29,7 +29,7 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
-        url: 'http://localhost:5050',
+        url: process.env.BASE_URL || 'http://localhost:5050',
       },
     ],
   },
