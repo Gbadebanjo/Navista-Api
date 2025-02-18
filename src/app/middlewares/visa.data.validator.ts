@@ -6,7 +6,7 @@ export const visaTypeSchema = z.enum([
   'CANADA EXPRESS ENTRY',
   'DUBAI GOLDEN VISA',
 ]);
-const EducationScoringSchema = z.object({
+export const EducationScoringSchema = z.object({
   PhD: z.number(),
   Masters: z.number(),
   Bachelors: z.number(),
@@ -14,37 +14,37 @@ const EducationScoringSchema = z.object({
   Other: z.number(),
 });
 
-const FieldMultipliersSchema = z.object({
+export const FieldMultipliersSchema = z.object({
   STEMDigitalArts: z.number(),
   BusinessEconomics: z.number(),
   OtherFields: z.number(),
 });
 
-const InstitutionRankingsSchema = z.object({
+export const InstitutionRankingsSchema = z.object({
   Top100Global: z.number(),
   Top500Global: z.number(),
   OtherAccredited: z.number(),
 });
 
-const ExperiencePointsSchema = z.object({
+export const ExperiencePointsSchema = z.object({
   '3-5Years': z.number(),
   '5-8Years': z.number(),
   '8+Years': z.number(),
 });
 
-const PositionMultipliersSchema = z.object({
+export const PositionMultipliersSchema = z.object({
   SeniorLevel: z.number(),
   MidLevel: z.number(),
   JuniorLevel: z.number(),
 });
 
-const AchievementScoringSchema = z.object({
+export const AchievementScoringSchema = z.object({
   '2Items': z.number(),
   '3Items': z.number(),
   '4PlusItems': z.number(),
 });
 
-const ImpactMultipliersSchema = z.object({
+export const ImpactMultipliersSchema = z.object({
   International: z.number(),
   National: z.number(),
   Regional: z.number(),

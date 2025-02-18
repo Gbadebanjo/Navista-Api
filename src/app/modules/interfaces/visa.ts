@@ -1,7 +1,7 @@
 /** VISA CRITERIAS */
 
 // Education Scoring Type
-type EducationScoring = {
+export type EducationScoring = {
   PhD: number;
   Masters: number;
   Bachelors: number;
@@ -9,39 +9,39 @@ type EducationScoring = {
   Other: number;
 };
 
-type FieldMultipliers = {
+export type FieldMultipliers = {
   STEMDigitalArts: number;
   BusinessEconomics: number; // ✅ Added Business/Economics
   OtherFields: number;
 };
 
-type InstitutionRankings = {
+export type InstitutionRankings = {
   Top100Global: number; // Percentage bonus (e.g., +20%)
   Top500Global: number; // Percentage bonus (e.g., +10%)
   OtherAccredited: number; // No adjustment
 };
 
 // Experience Scoring Type
-type ExperiencePoints = {
+export type ExperiencePoints = {
   '3-5Years': number;
   '5-8Years': number;
   '8+Years': number;
 };
 
-type PositionMultipliers = {
+export type PositionMultipliers = {
   SeniorLevel: number;
   MidLevel: number;
   JuniorLevel: number;
 };
 
 // Achievements Scoring Type
-type AchievementScoring = {
+export type AchievementScoring = {
   '2Items': number;
   '3Items': number;
   '4PlusItems': number;
 };
 
-type ImpactMultipliers = {
+export type ImpactMultipliers = {
   International: number;
   National: number;
   Regional: number;

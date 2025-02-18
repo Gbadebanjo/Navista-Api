@@ -28,86 +28,6 @@ export const getAllUsers = catchAsync(async (req, res) => {
 
 /**
  * @swagger
- * /api/v1/client-admins/all:
- *  get:
- *    summary: Get all Client Admins
- *    tags: [Super Admin]
- *    security:
- *      - bearerAuth: []
- *    responses:
- *      200:
- *        description: Successfully retrieved all client admins
- */
-export const getClientAdmins = catchAsync(async (req, res) => {
-  const admins = await supabaseAdmin.from('client_admins').select('*');
-  console.log(admins);
-  res.status(admins.status).json({
-    status: admins.statusText,
-    data: admins.data,
-  });
-});
-
-/**
- * @swagger
- * /api/v1/client-admins/{id}:
- *   get:
- *     summary: Get A Client Admin
- *     tags: [Super Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the client admin
- *     responses:
- *       200:
- *         description: Successfully retrieved a client admin
- */
-export const getAClientAdmin = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const admin = await supabaseAdmin.from('client_admins').select('*').eq('id', id);
-  res.status(admin.status).json({
-    status: admin.statusText,
-    data: admin.data,
-  });
-});
-
-/**
- * @swagger
- * /api/v1/client-admins/{id}:
- *   delete:
- *     summary: Delete A Client Admin
- *     tags: [Super Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the client admin
- *     responses:
- *       200:
- *         description: Successfully deleted a client admin
- */
-export const deleteClientAdmin = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const admin = await supabaseAdmin.from('client_admins').delete().eq('id', id);
-
-  //What About the client_admin_assignments table?
-
-  res.status(admin.status).json({
-    status: admin.statusText,
-    data: admin.data,
-  });
-});
-
-/**
- * @swagger
  * /api/v1/admin/user/{id}:
  *   get:
  *     summary: Get A User
@@ -252,78 +172,24 @@ export const createAdmin = catchAsync(async (req, res) => {
 
 /**
  * @swagger
- * /api/v1/admin/create-super-admin:
- *   post:
- *     summary: Create A Super Admin
- *     tags: [Super Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *             example:
- *               email: "example@gmail.com"
- *     responses:
- *       201:
- *         description: Successfully created a super admin
+ * /api/v1/admin/client-admins/all:
+ *  get:
+ *    summary: Get all Client Admins
+ *    tags: [Super Admin]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Successfully retrieved all client admins
  */
-export const createSuperAdmin = catchAsync(async (req, res) => {
-  const { email } = req.body;
-
-  const { data, error } = await supabaseAdmin.from('super_admins').insert({
-    email,
+export const getClientAdmins = catchAsync(async (req, res) => {
+  const admins = await supabaseAdmin.from('client_admins').select('*');
+  console.log(admins);
+  res.status(admins.status).json({
+    status: admins.statusText,
+    data: admins.data,
   });
-
-  if (error) return res.status(401).json({ success: false, error: error.message });
-
-  return res.status(201).json({
-    status: 'success',
-    data: data,
-  });
-});
-
-/**
- * @swagger
- * /api/v1/admin/remove-super-admin:
- *   post:
- *     summary: Remove A Super Admin
- *     tags: [Super Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *             example:
- *               email: "example@gmail.com"
- *     responses:
- *       201:
- *         description: Successfully removed a super admin
- */
-export const removeAsuperAdmin = catchAsync(async (req, res) => {
-  const { email } = req.body;
-  const { data, error } = await supabaseAdmin.from('super_admins').delete().eq('email', email);
-
-  if (error) return res.status(401).json({ success: false, error: error.message });
-
-  return res.status(201).json({
-    status: 'success',
-    data: data,
-  });
-});
-
-/**
+}); /**
  * @swagger
  * /api/v1/admin/assign-client:
  *   post:
@@ -401,6 +267,217 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
 
 /**
  * @swagger
+ * /api/v1/admin/client-admins/{id}:
+ *   get:
+ *     summary: Get A Client Admin
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the client admin
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved a client admin
+ */
+export const getAClientAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const admin = await supabaseAdmin.from('client_admins').select('*').eq('id', id);
+  res.status(admin.status).json({
+    status: admin.statusText,
+    data: admin.data,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/clients-and-admins/all:
+ *   get:
+ *     summary: Get all Admins with their Clients
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all clients and admins
+ */
+export const getAllAdminsWithClients = catchAsync(async (req, res) => {
+  const admins = await supabaseAdmin.from('client_admins').select('*');
+
+  const adminsClients = await Promise.all(
+    admins.data.map(async (admin) => {
+      const clients = await supabaseAdmin.from('client_admin_assignments').select('*').eq('client_admin_id', admin.id);
+
+      if (clients.data.length === 0) {
+        return { ...admin, clients: [] };
+      }
+
+      const clientDetails = await Promise.all(
+        clients.data[0].users_assigned.map(async (clientId) => {
+          const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
+          return client.data[0];
+        })
+      );
+
+      return { ...admin, clients: clientDetails };
+    })
+  );
+
+  res.status(admins.status).json({
+    status: admins.statusText,
+    data: adminsClients,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/client-admin/clients/all:
+ *   get:
+ *     summary: Get all Clients for a Client Admin
+ *     tags: [Client Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all clients
+ */
+export const getAllAdminClients = catchAsync(async (req, res) => {
+  const adminDetail = req.body.user;
+
+  const clientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', adminDetail.email);
+
+  const clients = await supabaseAdmin
+    .from('client_admin_assignments')
+    .select('*')
+    .eq('client_admin_id', clientAdmin.data[0].id);
+
+  if (clients.data.length === 0) {
+    return res.status(404).json({ error: 'No clients found for this admin' });
+  }
+
+  const clientDetails = await Promise.all(
+    clients.data[0].users_assigned.map(async (clientId) => {
+      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
+      return client.data[0];
+    })
+  );
+
+  res.status(clients.status).json({
+    status: clients.statusText,
+    data: clientDetails,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/client-admins/{id}:
+ *   delete:
+ *     summary: Delete A Client Admin
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the client admin
+ *     responses:
+ *       200:
+ *         description: Successfully deleted a client admin
+ */
+export const deleteClientAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const admin = await supabaseAdmin.from('client_admins').delete().eq('id', id);
+
+  //What About the client_admin_assignments table?
+
+  res.status(admin.status).json({
+    status: admin.statusText,
+    data: admin.data,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/create-super-admin:
+ *   post:
+ *     summary: Create A Super Admin
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *             example:
+ *               email: "example@gmail.com"
+ *     responses:
+ *       201:
+ *         description: Successfully created a super admin
+ */
+export const createSuperAdmin = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  const { data, error } = await supabaseAdmin.from('super_admins').insert({
+    email,
+  });
+
+  if (error) return res.status(401).json({ success: false, error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/remove-super-admin:
+ *   post:
+ *     summary: Remove A Super Admin
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *             example:
+ *               email: "example@gmail.com"
+ *     responses:
+ *       201:
+ *         description: Successfully removed a super admin
+ */
+export const removeAsuperAdmin = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const { data, error } = await supabaseAdmin.from('super_admins').delete().eq('email', email);
+
+  if (error) return res.status(401).json({ success: false, error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
+/**
+ * @swagger
  * /api/v1/admin/login:
  *   post:
  *     summary: Login As Admin
@@ -443,49 +520,10 @@ export const adminLogin = catchAsync(async (req, res) => {
 
 /**
  * @swagger
- * /api/v1/client-admins/all:
+ * /api/v1/client-admin/{id}:
  *   get:
- *     summary: Get all Clients for a Client Admin
+ *     summary: Get A Client assigned to a client admin
  *     tags: [Client Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved all clients
- */
-export const getAllAdminClients = catchAsync(async (req, res) => {
-  const adminDetail = req.body.user;
-
-  const clientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', adminDetail.email);
-
-  const clients = await supabaseAdmin
-    .from('client_admin_assignments')
-    .select('*')
-    .eq('client_admin_id', clientAdmin.data[0].id);
-
-  if (clients.data.length === 0) {
-    return res.status(404).json({ error: 'No clients found for this admin' });
-  }
-
-  const clientDetails = await Promise.all(
-    clients.data[0].users_assigned.map(async (clientId) => {
-      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
-      return client.data[0];
-    })
-  );
-
-  res.status(clients.status).json({
-    status: clients.statusText,
-    data: clientDetails,
-  });
-});
-
-/**
- * @swagger
- * /api/v1/client-admins/{id}:
- *   get:
- *     summary: Get A Client Admin
- *     tags: [Super Admin]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -494,7 +532,7 @@ export const getAllAdminClients = catchAsync(async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the client admin
+ *         description: The ID of the client
  *     responses:
  *       200:
  *         description: Successfully retrieved a client admin
@@ -528,46 +566,6 @@ export const getAnAdminClient = catchAsync(async (req, res) => {
   res.status(200).json({
     status: 'success',
     data: client,
-  });
-});
-
-/**
- * @swagger
- * /api/v1/admin/all:
- *   get:
- *     summary: Get all Admins with their Clients
- *     tags: [Super Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved all clients and admins
- */
-export const getAllAdminsWithClients = catchAsync(async (req, res) => {
-  const admins = await supabaseAdmin.from('client_admins').select('*');
-
-  const adminsClients = await Promise.all(
-    admins.data.map(async (admin) => {
-      const clients = await supabaseAdmin.from('client_admin_assignments').select('*').eq('client_admin_id', admin.id);
-
-      if (clients.data.length === 0) {
-        return { ...admin, clients: [] };
-      }
-
-      const clientDetails = await Promise.all(
-        clients.data[0].users_assigned.map(async (clientId) => {
-          const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
-          return client.data[0];
-        })
-      );
-
-      return { ...admin, clients: clientDetails };
-    })
-  );
-
-  res.status(admins.status).json({
-    status: admins.statusText,
-    data: adminsClients,
   });
 });
 

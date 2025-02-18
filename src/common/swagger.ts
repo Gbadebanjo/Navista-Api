@@ -29,11 +29,11 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
-        url: process.env.BASE_URL || 'http://localhost:5050',
+        url: 'http://localhost:5050',
       },
     ],
   },
-  apis: ['./src/app/modules/**/*.route.ts', './src/app/modules/admin/admin.controller.ts'],
+  apis: ['./src/app/modules/**/*.route.ts', './src/app/modules/**/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
