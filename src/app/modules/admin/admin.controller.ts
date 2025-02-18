@@ -520,7 +520,7 @@ export const adminLogin = catchAsync(async (req, res) => {
 
 /**
  * @swagger
- * /api/v1/client-admin/{id}:
+ * /api/v1/client-admin/clients/{id}:
  *   get:
  *     summary: Get A Client assigned to a client admin
  *     tags: [Client Admin]
