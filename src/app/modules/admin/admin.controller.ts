@@ -250,7 +250,10 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
     });
   }
 
-  const mailBody = assignClientToAdminEmailTemplate(data[0].first_name, client.data[0].first_name);
+  const mailBody = assignClientToAdminEmailTemplate(
+    data[0].first_name,
+    client.data[0].first_name || client.data[0].username
+  );
 
   await sendEmail({
     to: data[0].email,
