@@ -1,3 +1,9 @@
+import {
+  CanadaExpressEntrySchema,
+  DubaiGoldenVisaSchema,
+  IUKGlobalTalentVisaSchema,
+  IUSEB1EB2VisaSchema,
+} from '../../middlewares/visa.data.validator';
 import { IUKGlobalTalentVisa } from '../interfaces/visa';
 
 // 1. Education Calculation
@@ -132,8 +138,17 @@ const calculateFinalVisaScore = (
   numberOfAchievements: number,
   impactLevel: 'International' | 'National' | 'Regional',
   programCriteria: number,
-  positiveAdjustments: any,
-  negativeAdjustments: any,
+  positiveAdjustments: {
+    inDemandSkills?: boolean;
+    multipleQualifications?: boolean;
+    languageProficiency?: number;
+    regionalPriority?: boolean;
+  },
+  negativeAdjustments: {
+    incompleteDocumentation?: boolean;
+    employmentGaps?: boolean;
+    nonRelevantExperience?: boolean;
+  },
   programDifficulty: number,
   historicalSuccessRate: number,
   currentAcceptanceRate: number
@@ -158,4 +173,20 @@ const calculateFinalVisaScore = (
   );
 
   return successProbability;
+};
+
+//VISA DATA VALIDATOR
+export const validateVisaData = (visaType, data) => {
+  switch (visaType) {
+    case 'UK Global Talent Visa':
+      return IUKGlobalTalentVisaSchema.safeParse(data);
+    case 'US EB-1/EB-2 VISA':
+      return IUSEB1EB2VisaSchema.safeParse(data);
+    case 'CANADA EXPRESS ENTRY':
+      return CanadaExpressEntrySchema.safeParse(data);
+    case 'DUBAI GOLDEN VISA':
+      return DubaiGoldenVisaSchema.safeParse(data);
+    default:
+      return null;
+  }
 };

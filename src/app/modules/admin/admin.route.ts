@@ -19,19 +19,27 @@ clientAdminRouter.get('/clients/:id', AdminController.getAnAdminClient);
 supaAdminRouter.post('/login', AdminController.adminLogin);
 
 supaAdminRouter.use(SuperAdminAuthorize('super_admin'));
-supaAdminRouter.get('/all', AdminController.getAllUsers);
+
+supaAdminRouter.get('/users/all', AdminController.getAllUsers);
+
 supaAdminRouter.get('/client-admins/all', AdminController.getClientAdmins);
 supaAdminRouter.get('/client-admins/:id', AdminController.getAClientAdmin);
 supaAdminRouter.delete('/client-admins/:id', AdminController.deleteClientAdmin);
 
-supaAdminRouter.get('/:id', AdminController.getAUser);
+supaAdminRouter.get('/user/:id', AdminController.getAUser);
 supaAdminRouter.post('/create-super-admin', AdminController.createSuperAdmin);
 supaAdminRouter.post('/remove-super-admin', AdminController.removeAsuperAdmin);
 supaAdminRouter.get('/clients-and-admins/all', AdminController.getAllAdminsWithClients);
 supaAdminRouter.post('/create-admin', AdminController.createAdmin);
 supaAdminRouter.post('/assign-client', AdminController.assignClientToAdmin);
 
-supaAdminRouter.delete('/:id', AdminController.deleteUser);
+supaAdminRouter.delete('/user/:id', AdminController.deleteUser);
+
+//VISAS
+supaAdminRouter.get('/visas/all', AdminController.getAllVisas);
+supaAdminRouter.get('/visas/:id', AdminController.getAVisa);
+supaAdminRouter.post('/visas/update/:id', AdminController.updateVisa);
+supaAdminRouter.post('/visas/create', AdminController.createVisa);
 
 export { clientAdminRouter, supaAdminRouter };
 //

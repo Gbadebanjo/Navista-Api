@@ -21,4 +21,18 @@ const moduleRoutes = [
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
+/**
+ * @swagger
+ * /api/v1/all:
+ *   get:
+ *     summary: Get all /api/v1/all:
+ *     tags: [/api/v1/all:]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved users
+ */
+router.get('/all', async (req, res) => {
+  res.send('Working Successfully');
+});
+
 export default router;

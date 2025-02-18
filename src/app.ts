@@ -6,6 +6,9 @@ import helmet from 'helmet';
 import compression from 'compression';
 import router from './app/routes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
+// import swaggerDocs, { swaggerSpec } from './common/swagger';
+import swaggerDocs from './common/swagger';
+import { Express } from 'express';
 
 const app: Application = express();
 
@@ -23,10 +26,23 @@ app.use(
   })
 );
 
+swaggerDocs(app as Express);
+
 //development routes
 app.use('/api/v1', router);
 
 // Testing route
+/**
+ * @swagger
+ * /api/v1:
+ *  get:
+ *   summary: Test API
+ *  description: Test API
+ * responses:
+ * 200:
+ * description: Successfully retrieved users
+ *
+ */
 app.get('/api/v1', async (req: Request, res: Response) => {
   res.send('Working Successfully');
 });

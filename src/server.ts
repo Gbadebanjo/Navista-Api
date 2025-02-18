@@ -2,6 +2,8 @@
 import { Server } from 'http';
 import config from './config';
 import app from './app';
+import swaggerDocs from './common/swagger';
+import { Express } from 'express';
 
 process.on('uncaughtException', (error) => {
   console.log(error);
@@ -14,6 +16,7 @@ async function initializeDbConnection() {
   try {
     app.listen(config.port, () => {
       console.info(`Application listening on port ${config.port}`);
+      swaggerDocs(app as Express);
     });
 
     process.on('unhandledRejection', (error) => {
