@@ -5,6 +5,8 @@ import { version } from '../../package.json';
 
 // import log from './logger';
 
+const server_url = process.env.NODE_ENV === 'production' ? process.env.BASE_URL : 'http://localhost:5050';
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -29,7 +31,7 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
-        url: 'http://localhost:5050',
+        url: server_url,
       },
     ],
   },
