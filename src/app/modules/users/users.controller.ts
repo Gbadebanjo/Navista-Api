@@ -34,33 +34,137 @@ const allUsers = catchAsync(async (req: Request, res: Response) => {
  *           schema:
  *             type: object
  *             properties:
- *               education:
- *                 type: string
- *                 example: "phd"
- *               field:
- *                 type: string
- *                 example: "economics"
- *               experience:
+ *               assessment:
  *                 type: object
  *                 properties:
- *                   years:
- *                     type: integer
- *                     example: 4
- *                   position:
+ *                   education:
  *                     type: string
- *                     example: "MidLevel"
- *               achievement:
+ *                     example: "phd"
+ *                   field:
+ *                     type: string
+ *                     example: "economics"
+ *                   experience:
+ *                     type: object
+ *                     properties:
+ *                       years:
+ *                         type: integer
+ *                         example: 9
+ *                       position:
+ *                         type: string
+ *                         example: "Expert"
+ *                       foreignYears:
+ *                         type: integer
+ *                         example: 3
+ *                   achievement:
+ *                     type: object
+ *                     properties:
+ *                       achievementCount:
+ *                         type: integer
+ *                         example: 4
+ *                       achievementImpact:
+ *                         type: string
+ *                         example: "National"
+ *                       recognitionLevel:
+ *                         type: string
+ *                         example: "International"
+ *                   language:
+ *                     type: string
+ *                     example: "clb8"
+ *                   financialCategory:
+ *                     type: string
+ *                     example: "publicinvestment10mplus"
+ *                   salaryCategory:
+ *                     type: string
+ *                     example: "salary30kplus"
+ *                   positionCategory:
+ *                     type: string
+ *                     example: "ceo/md"
+ *               personal:
  *                 type: object
  *                 properties:
- *                   achievementCount:
- *                     type: integer
- *                     example: 3
- *                   achievementImpact:
+ *                   email:
  *                     type: string
- *                     example: "National"
+ *                     example: "example@gmail.com"
+ *                   fullName:
+ *                     type: string
+ *                     example: "John Mackerel"
+ *                   nationality:
+ *                     type: string
+ *                     example: "American"
+ *                   currentLocation:
+ *                     type: string
+ *                     example: "Cameroon"
  *     responses:
  *       200:
  *         description: Assessment Score
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 assessmentResult:
+ *                   type: object
+ *                   properties:
+ *                     uk:
+ *                       type: object
+ *                       properties:
+ *                         education:
+ *                           type: number
+ *                           example: 28.75
+ *                         experience:
+ *                           type: number
+ *                           example: 0
+ *                         achievements:
+ *                           type: number
+ *                           example: 27.5
+ *                         finalScore:
+ *                           type: number
+ *                           example: 56.25
+ *                     us:
+ *                       type: object
+ *                       properties:
+ *                         education:
+ *                           type: number
+ *                           example: 28.75
+ *                         experience:
+ *                           type: number
+ *                           example: 45
+ *                         achievements:
+ *                           type: number
+ *                           example: 25
+ *                         finalScore:
+ *                           type: number
+ *                           example: 98.75
+ *                     dubai:
+ *                       type: object
+ *                       properties:
+ *                         financial:
+ *                           type: number
+ *                           example: 100
+ *                         professional:
+ *                           type: number
+ *                           example: 50
+ *                         finalScore:
+ *                           type: number
+ *                           example: 150
+ *                     canada:
+ *                       type: object
+ *                       properties:
+ *                         education:
+ *                           type: number
+ *                           example: 25
+ *                         language:
+ *                           type: number
+ *                           example: 20
+ *                         workExperience:
+ *                           type: number
+ *                           example: 48.5
+ *                         finalScore:
+ *                           type: number
+ *                           example: 93.5
  */
 const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
   const ukVisa = await supabaseAdmin.from('visas').select('*').eq('visa_name', 'UK Global Talent Visa');
