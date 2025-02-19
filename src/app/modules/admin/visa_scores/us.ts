@@ -70,7 +70,7 @@ export type USUserInput = {
   };
   achievement: {
     achievementCount: number;
-    recognitionLevel: keyof USRecognitionLevels;
+    achievementImpact: keyof USRecognitionLevels;
   };
 };
 
@@ -133,7 +133,7 @@ export function calculateUSEB1EB2Score(
   //     achBase = criteria.achievements.scoring['2Items'];
   //   }
   // Add recognition bonus
-  achBase += criteria.achievements.recognitionLevels[user.achievement.recognitionLevel] || 0;
+  achBase += criteria.achievements.recognitionLevels[user.achievement.achievementImpact] || 0;
   const achievementsScore = achBase * 0.25;
 
   // --- Final Score ---

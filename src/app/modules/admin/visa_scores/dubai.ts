@@ -95,6 +95,6 @@ export function calculateDubaiGoldenVisaScore(
   return {
     financial: financialScore,
     professional: professionalScore,
-    finalScore,
+    finalScore: finalScore * 0.3,
   };
 }
