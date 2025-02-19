@@ -64,9 +64,6 @@ const allUsers = catchAsync(async (req: Request, res: Response) => {
  *                       achievementImpact:
  *                         type: string
  *                         example: "National"
- *                       recognitionLevel:
- *                         type: string
- *                         example: "International"
  *                   language:
  *                     type: string
  *                     example: "clb8"
