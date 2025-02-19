@@ -98,7 +98,7 @@ export function calculateUKGlobalTalentScore(
   const userPosition: keyof PositionMultipliers = user.experience.position;
 
   const experienceBase =
-    criteria.experience.experiencePoints[expCategory] + criteria.experience.positionMultipliers[userPosition];
+    criteria.experience.experiencePoints[expCategory] + criteria.experience.positionMultipliers[userPosition] || 0;
   const experienceScore = experienceBase * 0.3;
 
   // --- Achievements Compo ---
@@ -112,7 +112,7 @@ export function calculateUKGlobalTalentScore(
     achBase = criteria.achievements.scoring['4PlusItems'];
   }
 
-  achBase += criteria.achievements.impactMultipliers[user.achievement.achievementImpact];
+  achBase += criteria.achievements.impactMultipliers[user.achievement.achievementImpact] || 0;
   const achievementsScore = achBase * 0.25;
 
   //    const programCriteriaScore = criteria.programCriteria * 0.20; // Assuming we have a fixed program criteria score for UK
