@@ -1,17 +1,19 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../../interface/catchAsync';
-// import ApiError from '../../../error/ApiError';
-// import config from '../../../config';
-
-// import { ILoginUserResponse } from '../interfaces/users';
-// import httpStatus from 'http-status';
-// import sendResponse from '../../../common/sendResponse';
-// import { jwtHelper } from '../../../common/jwtHelper';
-import { supabase, supabaseAdmin } from '../../../config/supabase.config';
 import { calculateUKGlobalTalentScore } from '../admin/visa_scores/uk';
 import { calculateUSEB1EB2Score } from '../admin/visa_scores/us';
 import { calculateDubaiGoldenVisaScore } from '../admin/visa_scores/dubai';
 import { calculateCanadaExpressEntryScore } from '../admin/visa_scores/canada';
+
+import { decode } from 'base64-arraybuffer';
+import { supabase, supabaseAdmin } from '../../../config/supabase.config';
+import config from '../../../config';
+import { Multer } from 'multer';
+import { doc_typeSchema, visaTypeSchema } from '../../middlewares/visa.data.validator';
+
+type MulterRequest = Request & {
+  file: Multer.File;
+};
 
 const allUsers = catchAsync(async (req: Request, res: Response) => {
   const { data, error } = await supabase.from('profiles').select();
@@ -174,9 +176,9 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
   const userInput = req.body.assessment;
   const personalInfo = req.body.personal;
   const userEmail = req.body.personal.email;
-  // console.log('userInput', userInput);
-  // console.log('personalInfo', personalInfo);
-  // console.log('userEmail', userEmail);
+  // //console.log('userInput', userInput);
+  // //console.log('personalInfo', personalInfo);
+  // //console.log('userEmail', userEmail);
 
   if (!userInput || !personalInfo || !userEmail) {
     return res.status(400).json({ error: 'Invalid input' });
@@ -184,34 +186,35 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
 
   if (ukVisa) {
     ukAssessmentScore = calculateUKGlobalTalentScore(userInput, ukVisa.data[0].criteras);
-    console.log('ukAssessmentScore', ukAssessmentScore);
+    //console.log('ukAssessmentScore', ukAssessmentScore);
   }
   if (usVisa) {
     usAssessmentScore = calculateUSEB1EB2Score(userInput, usVisa.data[0].criteras);
-    console.log('usAssessmentScore', usAssessmentScore);
+    //console.log('usAssessmentScore', usAssessmentScore);
   }
   if (dubaiVisa) {
     dubaiAssessmentScore = calculateDubaiGoldenVisaScore(userInput, dubaiVisa.data[0].criteras);
-    console.log('dubaiAssessmentScore', dubaiAssessmentScore);
+    //console.log('dubaiAssessmentScore', dubaiAssessmentScore);
   }
   if (canadaVisa) {
     canadaAssessmentScore = calculateCanadaExpressEntryScore(userInput, canadaVisa.data[0].criteras);
-    console.log('canadaAssessmentScore', canadaAssessmentScore);
+    //console.log('canadaAssessmentScore', canadaAssessmentScore);
   }
 
-  const { error, data } = await supabaseAdmin.from('client_assessments').upsert(
+  const { error } = await supabaseAdmin.from('client_assessments').upsert(
     [
       {
         email: userEmail,
         personal: personalInfo,
         assessment_data: userInput,
+        // client_id: req.body.user.id
         // score: assessmentScore,
         // updated_at: new Date(),
       },
     ],
     { onConflict: 'email' }
   );
-  // console.log('error', error, data);
+  // //console.log('error', error, data);
 
   if (error) return res.status(400).json({ error: error.message });
 
@@ -226,9 +229,314 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/v1/users/upload:
+ *   post:
+ *     summary: Upload documents
+ *     tags: [Users]
+ *     description: Upload documents
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               visa_type:
+ *                 type: string
+ *                 enum: ['UK Global Talent Visa', 'US EB-1/EB-2 VISA', 'CANADA EXPRESS ENTRY', 'DUBAI GOLDEN VISA']
+ *               uploadingFor:
+ *                 type: string
+ *                 enum: ['Resume', 'Personal Statement', 'Letter of Recommendation', 'Degree Certificate', 'Language Proficiency Result', 'Proof of Funds']
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 fileUrl:
+ *                   type: string
+ *                   example: "https://your-supabase-url.com/storage/v1/object/public/bucket_name/user123/visa_type/uploadingFor"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Please upload a file"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       path:
+ *                         type: string
+ *                         example: "visa_type"
+ *                       message:
+ *                         type: string
+ *                         example: "Invalid visa type"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while uploading the file"
+ */
+
+const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
+  try {
+    const file = req.file;
+
+    //console.log(file);
+
+    if (!file) {
+      res.status(400).json({ message: 'Please upload a file' });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      res.status(400).json({ message: 'File size exceeds 5MB' });
+      return;
+    }
+
+    const mimeType = file.mimetype;
+
+    const { user } = req.body;
+
+    const visa_type = visaTypeSchema.safeParse(req.body.visa_type);
+    const uploadingFor = doc_typeSchema.safeParse(req.body.uploadingFor);
+
+    if (!visa_type.success) {
+      res.status(400).json({ message: 'Please provide appropriate valid visa type', error: visa_type.error.errors });
+      return;
+    }
+
+    if (!uploadingFor.success) {
+      res
+        .status(400)
+        .json({ message: 'Please provide appropriate valid document type', error: uploadingFor.error.errors });
+      return;
+    }
+
+    //console.log('user info', user);
+
+    if (!user) {
+      res.status(400).json({ message: 'User not provided' });
+      return;
+    }
+
+    const bucket_name = config.supabase.bucket_name;
+    const fileExt = file.originalname.split('.').pop();
+
+    // decode file buffer to base64
+    const fileBase64 = decode(file.buffer.toString('base64'));
+    const file_path = `${user.id}/${visa_type.data}/${uploadingFor.data}.${fileExt}`;
+
+    // Check if the file already exists
+    const { data: existingFile, error: checkError } = await supabaseAdmin.storage
+      .from(bucket_name)
+      .list(file_path.split('/').slice(0, -1).join('/')); // List files in the folder
+
+    if (checkError) throw checkError;
+
+    const fileExists = existingFile?.some((file) => file.name === file_path.split('/').pop());
+
+    // If file exists, delete it first
+    if (fileExists) {
+      const { error: deleteError } = await supabaseAdmin.storage.from(bucket_name).remove([file_path]);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // Upload new file
+    const { data, error } = await supabaseAdmin.storage
+      .from(bucket_name)
+      .upload(file_path, fileBase64, { contentType: mimeType });
+
+    if (error) throw error;
+
+    //console.log(visa_type.data, uploadingFor.data, user.id);
+
+    const findDoc = await supabaseAdmin
+      .from('documents')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('visa_type', visa_type.data)
+      .eq('document_type', uploadingFor.data)
+      .single();
+
+    if (findDoc.data) {
+      const { error: updateErr } = await supabaseAdmin
+        .from('documents')
+        .update({ file_path: file_path })
+        .eq('user_id', user.id)
+        .eq('visa_type', visa_type.data)
+        .eq('document_type', uploadingFor.data);
+      //console.log('updateErr', updateErr);
+      if (updateErr) throw updateErr;
+    } else {
+      const addToDb = await supabaseAdmin.from('documents').insert({
+        user_id: user.id,
+        visa_type: visa_type.data,
+        document_type: uploadingFor.data,
+        file_path: file_path,
+      });
+
+      if (addToDb.error) throw addToDb.error;
+    }
+
+    // get public url of the uploaded file
+    const { data: fileUrl } = await supabaseAdmin.storage
+      .from(bucket_name)
+      .createSignedUrl(file_path, Number(config.supabase.document_expiry));
+
+    // //console.log(file);
+    res.status(200).json({ fileUrl: fileUrl });
+  } catch (error) {
+    //console.log(error);
+    res.status(500).json({ error: error });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/users/get-signed-url:
+ *   post:
+ *     summary: Get signed URL for a document
+ *     tags: [Users]
+ *     description: Retrieve a signed URL for a document based on user ID, visa type, and document type.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               visa_type:
+ *                 type: string
+ *                 enum: ['UK Global Talent Visa', 'US EB-1/EB-2 VISA', 'CANADA EXPRESS ENTRY', 'DUBAI GOLDEN VISA']
+ *               uploadingFor:
+ *                 type: string
+ *                 enum: ['Resume', 'Personal Statement', 'Letter of Recommendation', 'Degree Certificate', 'Language Proficiency Result', 'Proof of Funds']
+ *     responses:
+ *       200:
+ *         description: Signed URL retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 fileUrl:
+ *                   type: string
+ *                   example: "https://your-supabase-url.com/storage/v1/object/public/bucket_name/user123/visa_type/uploadingFor"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Please upload a file"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       path:
+ *                         type: string
+ *                         example: "visa_type"
+ *                       message:
+ *                         type: string
+ *                         example: "Invalid visa type"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while uploading the file"
+ */
+
+const getSignedUrl = catchAsync(async (req: Request, res: Response) => {
+  try {
+    const { user } = req.body;
+
+    const visa_type = visaTypeSchema.safeParse(req.body.visa_type);
+    const uploadingFor = doc_typeSchema.safeParse(req.body.uploadingFor);
+
+    if (!visa_type.success) {
+      res.status(400).json({ message: 'Please provide appropriate valid visa type', error: visa_type.error.errors });
+      return;
+    }
+
+    if (!uploadingFor.success) {
+      res
+        .status(400)
+        .json({ message: 'Please provide appropriate valid document type', error: uploadingFor.error.errors });
+      return;
+    }
+
+    if (!user) {
+      res.status(400).json({ message: 'User not provided' });
+      return;
+    }
+
+    const bucket_name = config.supabase.bucket_name;
+
+    const { data, error } = await supabaseAdmin
+      .from('documents')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('visa_type', visa_type.data)
+      .eq('document_type', uploadingFor.data)
+      .single();
+
+    // if (error) throw error;
+
+    if (!data) {
+      res.status(404).json({ message: 'Document not found' });
+      return;
+    }
+    // //console.log(data);
+
+    // get public url of the uploaded file
+
+    const { data: fileUrl } = await supabaseAdmin.storage
+      .from(bucket_name)
+      .createSignedUrl(data.file_path, Number(config.supabase.document_expiry));
+
+    //console.log(config.supabase.document_expiry);
+
+    res.status(200).json({ fileUrl: fileUrl });
+  } catch (error) {
+    //console.log(error);
+    res.status(500).json({ error: error });
+  }
+});
+
 export const UserController = {
   // register,
   // login,
   allUsers,
   takeAssessMentt,
+  uploadDocuments,
+  getSignedUrl,
 };

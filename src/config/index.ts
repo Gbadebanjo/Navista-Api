@@ -18,6 +18,8 @@ export default {
     key: process.env.SUPERBASE_DATABASE_KEY,
     admin_key: process.env.SUPERBASE_SERVICE_ROLE_KEY,
     supa_admin_email: process.env.SUPER_ADMIN_EMAIL,
+    bucket_name: process.env.SUPERBASE_BUCKET_NAME,
+    document_expiry: process.env.SUPABASE_DOC_SIGNED_URL_EXPIRY,
   },
   mail: {
     user: process.env.EMAIL_USER,

@@ -14,6 +14,10 @@ const options: swaggerJsdoc.Options = {
       title: 'Navisa API Docs',
       version,
       description: 'API documentation for Navisa',
+      contact: {
+        name: 'Navisa',
+        email: 'oluwagbogoadebanjo@gmail.com',
+      },
     },
     components: {
       securitySchemes: {

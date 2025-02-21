@@ -6,6 +6,16 @@ export const visaTypeSchema = z.enum([
   'CANADA EXPRESS ENTRY',
   'DUBAI GOLDEN VISA',
 ]);
+
+export const doc_typeSchema = z.enum([
+  'Resume',
+  'Personal Statement',
+  'Letter of Recommendation',
+  'Degree Certificate',
+  'Language Proficiency Result',
+  'Proof of Funds',
+]);
+
 export const EducationScoringSchema = z.object({
   PhD: z.number(),
   Masters: z.number(),

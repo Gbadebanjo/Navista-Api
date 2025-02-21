@@ -1,7 +1,7 @@
-import { supabase } from '../config/supabase.config';
+import { supabaseAdmin } from '../config/supabase.config';
 
-export async function uploadFile(file: File, file_path: string, bucket_name: string) {
-  const { data, error } = await supabase.storage.from(bucket_name).upload(file_path, file);
+export async function uploadFile(file: string, file_path: string, bucket_name: string) {
+  const { data, error } = await supabaseAdmin.storage.from(bucket_name).upload(file_path, file);
   if (error) {
     // Handle error
 
