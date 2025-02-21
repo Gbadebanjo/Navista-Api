@@ -4,7 +4,6 @@ import { calculateUKGlobalTalentScore } from '../admin/visa_scores/uk';
 import { calculateUSEB1EB2Score } from '../admin/visa_scores/us';
 import { calculateDubaiGoldenVisaScore } from '../admin/visa_scores/dubai';
 import { calculateCanadaExpressEntryScore } from '../admin/visa_scores/canada';
-
 import { decode } from 'base64-arraybuffer';
 import { supabase, supabaseAdmin } from '../../../config/supabase.config';
 import config from '../../../config';
@@ -501,7 +500,7 @@ const getSignedUrl = catchAsync(async (req: Request, res: Response) => {
 
     const bucket_name = config.supabase.bucket_name;
 
-    const { data, error } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from('documents')
       .select('*')
       .eq('user_id', user.id)
