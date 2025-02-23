@@ -5,6 +5,7 @@ import catchAsync from '../../../interface/catchAsync';
 import bcrypt from 'bcrypt';
 import { validateVisaData } from './admin.helpers';
 import { visaTypeSchema } from '../../middlewares/visa.data.validator';
+import config from '../../../config';
 
 /**
  * @swagger
@@ -47,12 +48,31 @@ export const getAllUsers = catchAsync(async (req, res) => {
  */
 export const getAUser = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const user = await supabaseAdmin.from('profiles').select('*').eq('id', id);
+  const user = await supabaseAdmin.from('profiles').select('*').eq('id', id).single();
+
+  if (!user.data) return res.status(404).json({ error: 'User not found' });
+  const documentPaths = await supabaseAdmin.from('documents').select('*').eq('user_id', id);
+  // console.log(user);
+
+  const user_assessments = await supabaseAdmin
+    .from('client_assessments')
+    .select('*')
+    .eq('email', user.data.email)
+    .single();
+
+  // const documents = documentPaths.data.map((doc) => await supabaseAdmin.storage.from('documents').createSignedUrls);
+  const documents = await supabaseAdmin.storage.from(config.supabase.bucket_name).createSignedUrls(
+    documentPaths.data.map((doc) => doc.file_path),
+    Number(config.supabase.document_expiry)
+  );
+
   // const users = await supabase.auth.admin.listUsers();
   // console.log(users);
   res.status(user.status).json({
     status: user.statusText,
     data: user.data,
+    user_documents: documents,
+    user_assessment: user_assessments.data,
   });
 });
 
@@ -290,6 +310,7 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
 export const getAClientAdmin = catchAsync(async (req, res) => {
   const { id } = req.params;
   const admin = await supabaseAdmin.from('client_admins').select('*').eq('id', id);
+
   res.status(admin.status).json({
     status: admin.statusText,
     data: admin.data,
@@ -557,8 +578,9 @@ export const getAnAdminClient = catchAsync(async (req, res) => {
 
   const clientDetails = await Promise.all(
     clients.data[0].users_assigned.map(async (clientId) => {
-      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId);
-      return client.data[0];
+      const client = await supabaseAdmin.from('profiles').select('*').eq('id', clientId).single();
+
+      return { ...client.data[0] };
     })
   );
 
@@ -566,9 +588,22 @@ export const getAnAdminClient = catchAsync(async (req, res) => {
 
   if (!client) return res.status(404).json({ error: 'Client not found' });
 
+  const documentPaths = await supabaseAdmin.from('documents').select('*').eq('user_id', client.id);
+
+  const documents = await supabaseAdmin.storage.from('documents').createSignedUrls(
+    documentPaths.data.map((doc) => doc.file_path),
+    Number(config.supabase.document_expiry)
+  );
+
+  const user_assessments = await supabaseAdmin
+    .from('client_assessments')
+    .select('*')
+    .eq('email', client.data.email)
+    .single();
+
   res.status(200).json({
     status: 'success',
-    data: client,
+    data: { client: client, user_documents: documents, user_assessment: user_assessments.data },
   });
 });
 

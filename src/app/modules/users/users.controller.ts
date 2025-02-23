@@ -217,6 +217,22 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
 
   if (error) return res.status(400).json({ error: error.message });
 
+  const saveApplicationStatus = await supabaseAdmin.from('application_trackings').upsert(
+    [
+      {
+        email: userEmail,
+        stage: 'Assessment Test',
+        status: 'Completed',
+        comment: 'Assessment test completed successfully',
+      },
+    ],
+    {
+      onConflict: 'email',
+    }
+  );
+
+  if (saveApplicationStatus.error) return res.status(400).json({ error: saveApplicationStatus.error.message });
+
   res.status(200).json({
     success: true,
     assessmentResult: {
@@ -396,6 +412,20 @@ const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
 
       if (addToDb.error) throw addToDb.error;
     }
+
+    const saveApplicationStatus = await supabaseAdmin.from('application_trackings').upsert(
+      [
+        {
+          email: user.email,
+          stage: 'Document Upload',
+          status: 'Ongoing',
+          comment: 'Document Upload in progress',
+        },
+      ],
+      { onConflict: 'email' }
+    );
+
+    if (saveApplicationStatus.error) return res.status(400).json({ error: saveApplicationStatus.error.message });
 
     // get public url of the uploaded file
     const { data: fileUrl } = await supabaseAdmin.storage
