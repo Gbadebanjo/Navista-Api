@@ -14,5 +14,6 @@ router.post('/take-assessment', UserController.takeAssessMentt);
 // router.use
 router.post('/upload', upload.single('file'), authorize, UserController.uploadDocuments);
 router.post('/get-signed-url', authorize, UserController.getSignedUrl);
+router.get('/get-score', authorize, UserController.getAssessmentScore);
 
 export const UserRoutes = router;

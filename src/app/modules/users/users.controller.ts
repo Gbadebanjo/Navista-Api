@@ -206,6 +206,12 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
         email: userEmail,
         personal: personalInfo,
         assessment_data: userInput,
+        score: {
+          uk: ukAssessmentScore,
+          us: usAssessmentScore,
+          dubai: dubaiAssessmentScore,
+          canada: canadaAssessmentScore,
+        },
         // client_id: req.body.user.id
         // score: assessmentScore,
         // updated_at: new Date(),
@@ -242,6 +248,28 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
       canada: canadaAssessmentScore,
     },
   });
+});
+
+const getAssessmentScore = catchAsync(async (req: Request, res: Response) => {
+  const { user } = req.body;
+
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' });
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin.from('client_assessments').select('*').eq('email', user.email).single();
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    if (!data) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 });
 
 /**
@@ -568,4 +596,5 @@ export const UserController = {
   takeAssessMentt,
   uploadDocuments,
   getSignedUrl,
+  getAssessmentScore,
 };
