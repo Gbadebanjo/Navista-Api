@@ -295,6 +295,9 @@ const getAssessmentScore = catchAsync(async (req: Request, res: Response) => {
  *               uploadingFor:
  *                 type: string
  *                 enum: ['Resume', 'Personal Statement', 'Letter of Recommendation', 'Degree Certificate', 'Language Proficiency Result', 'Proof of Funds']
+ *               doc_number:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       200:
  *         description: File uploaded successfully
@@ -338,7 +341,6 @@ const getAssessmentScore = catchAsync(async (req: Request, res: Response) => {
  *                   type: string
  *                   example: "An error occurred while uploading the file"
  */
-
 const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
   try {
     const file = req.file;
@@ -360,7 +362,15 @@ const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
     const { user } = req.body;
 
     const visa_type = visaTypeSchema.safeParse(req.body.visa_type);
-    const uploadingFor = doc_typeSchema.safeParse(req.body.uploadingFor);
+    // const uploadingFor = doc_typeSchema.safeParse(req.body.uploadingFor);
+    const uploadingFor = req.body.uploadingFor;
+    const doc_number = req.body.doc_number;
+
+    const max_doc_number = 3;
+
+    if (doc_number < 1 || doc_number > 3 || isNaN(doc_number)) {
+      return res.status(400).json({ message: 'Please provide a valid document number' });
+    }
 
     if (!visa_type.success) {
       res.status(400).json({ message: 'Please provide appropriate valid visa type', error: visa_type.error.errors });
@@ -386,7 +396,7 @@ const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
 
     // decode file buffer to base64
     const fileBase64 = decode(file.buffer.toString('base64'));
-    const file_path = `${user.id}/${visa_type.data}/${uploadingFor.data}.${fileExt}`;
+    const file_path = `${user.id}/${visa_type.data}/${uploadingFor.data}/${doc_number}.${fileExt}`;
 
     // Check if the file already exists
     const { data: existingFile, error: checkError } = await supabaseAdmin.storage
@@ -418,16 +428,24 @@ const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
       .select('*')
       .eq('user_id', user.id)
       .eq('visa_type', visa_type.data)
-      .eq('document_type', uploadingFor.data)
-      .single();
+      .eq('document_type', uploadingFor.data);
 
-    if (findDoc.data) {
+    const checkFilePath = findDoc.data.find((doc) => doc.file_path === file_path);
+
+    if (!checkFilePath && findDoc.data.length >= max_doc_number) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'You have exceeded the maximum number of documents for this category' });
+    }
+
+    if (checkFilePath) {
       const { error: updateErr } = await supabaseAdmin
         .from('documents')
         .update({ file_path: file_path })
         .eq('user_id', user.id)
         .eq('visa_type', visa_type.data)
-        .eq('document_type', uploadingFor.data);
+        .eq('document_type', uploadingFor.data)
+        .eq('file_path', checkFilePath.file_path);
       //console.log('updateErr', updateErr);
       if (updateErr) throw updateErr;
     } else {
@@ -465,6 +483,152 @@ const uploadDocuments = catchAsync(async (req: MulterRequest, res) => {
   } catch (error) {
     //console.log(error);
     res.status(500).json({ error: error });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/users/remove-document:
+ *   post:
+ *     summary: Remove a document
+ *     tags: [Users]
+ *     description: Remove a document based on the provided file path.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file_path:
+ *                 type: string
+ *                 example: "path/to/your/document"
+ *     responses:
+ *       200:
+ *         description: File removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "File removed successfully"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Please provide a file path"
+ *                 error:
+ *                   type: string
+ *                   example: "Error message"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while removing the file"
+ */
+
+const removeDocument = catchAsync(async (req: Request, res: Response) => {
+  const { file_path } = req.body;
+
+  if (!file_path) {
+    return res.status(400).json({ message: 'Please provide a file path' });
+  }
+
+  const bucket_name = config.supabase.bucket_name;
+
+  const { error } = await supabaseAdmin.storage.from(bucket_name).remove([file_path]);
+
+  if (error) return res.status(400).json({ error: error.message });
+
+  res.status(200).json({ message: 'File removed successfully' });
+});
+
+/**
+ * @swagger
+ * /api/v1/users/update-trackings:
+ *   post:
+ *     summary: Update application trackings
+ *     tags: [Users]
+ *     description: Update application trackings based on the provided user email.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *               stage:
+ *                 type: string
+ *               visa_type:
+ *                 type: string
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Trackings updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+const updateTrackings = catchAsync(async (req: Request, res: Response) => {
+  const { user, status, stage, visa_type, comment } = req.body;
+
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' });
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('application_trackings')
+      .update({
+        status,
+        stage,
+        comment,
+        visa_type,
+      })
+      .eq('email', user.email);
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -597,4 +761,6 @@ export const UserController = {
   uploadDocuments,
   getSignedUrl,
   getAssessmentScore,
+  removeDocument,
+  updateTrackings,
 };

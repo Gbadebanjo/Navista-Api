@@ -13,6 +13,8 @@ router.get('/all', UserController.allUsers);
 router.post('/take-assessment', UserController.takeAssessMentt);
 // router.use
 router.post('/upload', upload.single('file'), authorize, UserController.uploadDocuments);
+router.post('/remove-document', authorize, UserController.removeDocument);
+router.post('/update-trackings', authorize, UserController.updateTrackings);
 router.post('/get-signed-url', authorize, UserController.getSignedUrl);
 router.get('/get-score', authorize, UserController.getAssessmentScore);
 
