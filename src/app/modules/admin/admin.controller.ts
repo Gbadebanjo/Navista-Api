@@ -21,9 +21,57 @@ import config from '../../../config';
  */
 export const getAllUsers = catchAsync(async (req, res) => {
   const users = await supabaseAdmin.from('profiles').select('*');
+
+  const usersAdmins = await Promise.all(
+    users.data.map(async (user) => {
+      const clientAdmin = await supabaseAdmin.from('client_admin_assignments').select('*');
+
+      console.log(clientAdmin);
+
+      const searchClientAdmin = clientAdmin.data.find((admin) => admin.users_assigned.includes(user.id));
+
+      const visa_application = await supabaseAdmin
+        .from('application_trackings')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      if (!searchClientAdmin) {
+        return {
+          ...user,
+          client_Admin: null,
+          visa_type: visa_application?.data?.visa_type ? visa_application?.data?.visa_type || null : null,
+        };
+      }
+
+      const clientAdminDetails = await supabaseAdmin
+        .from('client_admins')
+        .select('*')
+        .eq('id', searchClientAdmin.client_admin_id)
+        .single();
+
+      if (!clientAdminDetails.data)
+        return {
+          ...user,
+          client_Admin: null,
+          visa_type: visa_application?.data?.visa_type ? visa_application?.data?.visa_type || null : null,
+        };
+
+      return {
+        ...user,
+        client_admin: {
+          id: clientAdminDetails.data.id,
+          name: `${clientAdminDetails.data.first_name} ${clientAdminDetails.data.last_name}`,
+          email: clientAdminDetails.data.email,
+        },
+        visa_type: visa_application?.data?.visa_type ? visa_application?.data?.visa_type || null : null,
+      };
+    })
+  );
   res.status(users.status).json({
     status: users.statusText,
-    data: users.data,
+    data: usersAdmins,
+    admins: usersAdmins,
   });
 });
 
@@ -502,6 +550,26 @@ export const removeAsuperAdmin = catchAsync(async (req, res) => {
 
 /**
  * @swagger
+ * /api/v1/admin/super-admins/all:
+ *   get:
+ *     summary: Get all Super Admins
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all super admins
+ */
+export const getAllSuperAdmins = catchAsync(async (req, res) => {
+  const superAdmins = await supabaseAdmin.from('super_admins').select('*');
+  res.status(superAdmins.status).json({
+    status: superAdmins.statusText,
+    data: superAdmins.data,
+  });
+});
+
+/**
+ * @swagger
  * /api/v1/admin/login:
  *   post:
  *     summary: Login As Admin
@@ -532,9 +600,24 @@ export const adminLogin = catchAsync(async (req, res) => {
     password,
   });
 
-  console.log(data, error);
+  // console.log(data, error);
 
   if (error) return res.status(401).json({ error: error.message });
+
+  const checkIfSuperAdmin = await supabaseAdmin.from('super_admins').select('*').eq('email', email);
+
+  const checkIfClientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', email);
+
+  if (checkIfSuperAdmin.data.length === 0 && checkIfClientAdmin.data.length === 0)
+    return res.status(401).json({ error: 'Unauthorized' });
+
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      user: { ...data.user.user_metadata, role: checkIfSuperAdmin.data.length > 0 ? 'super_admin' : 'client_admin' },
+      token: data.session.access_token,
+    },
+  });
 
   return res.status(200).json({
     status: 'success',
@@ -822,6 +905,151 @@ export const createVisa = catchAsync(async (req, res) => {
     visa_name: visaType.data,
     criteras: validateData.data,
   });
+
+  if (error) return res.status(401).json({ error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/applications/all:
+ *   get:
+ *     summary: Get all Applications
+ *     tags: [Super Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all applications
+ *       401:
+ *         description: Error retrieving all applications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *             example: "Error retrieving all applications"
+ */
+export const getAllApplications = catchAsync(async (req, res) => {
+  try {
+    const { data: appliations, error } = await supabaseAdmin.from('application_trackings').select('*');
+    if (error) return res.status(401).json({ error: error.message });
+
+    const applicationsDetail = await Promise.all(
+      appliations.map(async (application) => {
+        const user = await supabaseAdmin.from('profiles').select('*').eq('email', application.email).single();
+
+        const { data: user_assessment } = await supabaseAdmin
+          .from('client_assessments')
+          .select('*')
+          .eq('email', application.email)
+          .single();
+        let user_score = 0;
+        const fieldOfStudy = user_assessment.assessment_data.field;
+        const yearsOfExperience = user_assessment.assessment_data.experience.years;
+        const nationality = user_assessment.personal.nationality;
+
+        switch (application.visa_type) {
+          case 'UK Global Talent Visa':
+            user_score = user_assessment.score.uk;
+            break;
+
+          case 'US EB-1/EB-2 VISA':
+            user_score = user_assessment.score.us;
+            break;
+
+          case 'CANADA EXPRESS ENTRY':
+            user_score = user_assessment.score.canada;
+            break;
+
+          case 'DUBAI GOLDEN VISA':
+            user_score = user_assessment.score.dubai;
+            break;
+          default:
+            break;
+        }
+
+        const incompleteUser = {
+          first_name: user_assessment.personal.fullName.split(' ')[0],
+          last_name: user_assessment.personal.fullName.split(' ')[1],
+          email: application.email,
+        };
+
+        if (!user.data)
+          return {
+            ...application,
+            user: incompleteUser,
+            documents: [],
+            eligibilityScores: user_score,
+
+            nationality: nationality,
+            fieldOfStudy: fieldOfStudy,
+            workHistory: yearsOfExperience + ' years',
+          };
+
+        const { data: documents, error: docerror } = await supabaseAdmin
+          .from('documents')
+          .select('*')
+          .eq('user_id', user.data.id);
+
+        if (docerror) return res.status(401).json({ error: docerror.message });
+
+        const documentsWithUrl = await Promise.all(
+          documents.map(async (doc) => {
+            const { data: signedURL, error } = await supabaseAdmin.storage
+              .from(config.supabase.bucket_name)
+              .createSignedUrl(doc.file_path, Number(config.supabase.document_expiry));
+
+            if (error) return res.status(401).json({ error: error.message });
+
+            return { ...doc, signedUrl: signedURL.signedUrl };
+          })
+        );
+
+        return {
+          ...application,
+          user: user.data ? user.data : incompleteUser,
+          documents: documentsWithUrl,
+          eligibilityScores: user_score,
+
+          nationality: nationality,
+          fieldOfStudy: fieldOfStudy,
+          workHistory: yearsOfExperience + ' years',
+        };
+      })
+    );
+
+    return res.status(200).json({
+      status: 'success',
+      data: applicationsDetail.filter((app) => app.user !== null),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({ error: error.message });
+  }
+});
+
+export const approveADocument = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabaseAdmin.from('documents').update({ status: 'Verified' }).eq('id', id);
+
+  if (error) return res.status(401).json({ error: error.message });
+
+  return res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
+
+export const rejectADocument = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabaseAdmin.from('documents').update({ status: false }).eq('id', id);
 
   if (error) return res.status(401).json({ error: error.message });
 
