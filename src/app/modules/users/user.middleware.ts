@@ -29,6 +29,25 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
 
+      // console.log('getUser', getUser.data.user);
+
+      const profileCheck = await supabaseAdmin.from('profiles').select('*').eq('id', getUser.data.user.id).single();
+
+      console.log('profileCheck', profileCheck);
+
+      if (!profileCheck.data) {
+        // await supabaseAdmin.from('profiles').insert({
+        //   id: getUser.data.user.id,
+        //   email: getUser.data.user.email,
+        // });
+        // await supabaseAdmin
+        //   .from('profiles')
+        //   .update({
+        //     email: getUser.data.user.email,
+        //   })
+        //   .eq('id', getUser.data.user.id);
+      }
+
       const { data, error } = await supabaseAdmin
         .from('client_assessments')
         .select('*')

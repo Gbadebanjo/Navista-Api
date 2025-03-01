@@ -34,6 +34,8 @@ supaAdminRouter.post('/create-admin', AdminController.createAdmin);
 supaAdminRouter.post('/assign-client', AdminController.assignClientToAdmin);
 supaAdminRouter.get('/all-applications', AdminController.getAllApplications);
 supaAdminRouter.put('/application/approve-document/:id', AdminController.approveADocument);
+supaAdminRouter.put('/application/reject-document/:id', AdminController.rejectADocument);
+
 supaAdminRouter.get('/super-admins/all', AdminController.getAllSuperAdmins);
 
 supaAdminRouter.delete('/user/:id', AdminController.deleteUser);

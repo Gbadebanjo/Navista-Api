@@ -951,34 +951,34 @@ export const getAllApplications = catchAsync(async (req, res) => {
           .eq('email', application.email)
           .single();
         let user_score = 0;
-        const fieldOfStudy = user_assessment.assessment_data.field;
-        const yearsOfExperience = user_assessment.assessment_data.experience.years;
-        const nationality = user_assessment.personal.nationality;
+        const fieldOfStudy = user_assessment?.assessment_data?.field;
+        const yearsOfExperience = user_assessment?.assessment_data?.experience?.years;
+        const nationality = user_assessment?.personal?.nationality;
 
         switch (application.visa_type) {
           case 'UK Global Talent Visa':
-            user_score = user_assessment.score.uk;
+            user_score = user_assessment?.score?.uk;
             break;
 
           case 'US EB-1/EB-2 VISA':
-            user_score = user_assessment.score.us;
+            user_score = user_assessment?.score?.us;
             break;
 
           case 'CANADA EXPRESS ENTRY':
-            user_score = user_assessment.score.canada;
+            user_score = user_assessment?.score?.canada;
             break;
 
           case 'DUBAI GOLDEN VISA':
-            user_score = user_assessment.score.dubai;
+            user_score = user_assessment?.score?.dubai;
             break;
           default:
             break;
         }
 
         const incompleteUser = {
-          first_name: user_assessment.personal.fullName.split(' ')[0],
-          last_name: user_assessment.personal.fullName.split(' ')[1],
-          email: application.email,
+          first_name: user_assessment?.personal?.fullName.split(' ')[0],
+          last_name: user_assessment?.personal?.fullName.split(' ')[1],
+          email: application?.email,
         };
 
         if (!user.data)
@@ -1049,7 +1049,7 @@ export const approveADocument = catchAsync(async (req, res) => {
 
 export const rejectADocument = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { data, error } = await supabaseAdmin.from('documents').update({ status: false }).eq('id', id);
+  const { data, error } = await supabaseAdmin.from('documents').update({ status: 'Disapproved' }).eq('id', id);
 
   if (error) return res.status(401).json({ error: error.message });
 
