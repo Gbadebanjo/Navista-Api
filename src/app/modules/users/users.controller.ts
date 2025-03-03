@@ -174,7 +174,7 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
 
   const userInput = req.body.assessment;
   const personalInfo = req.body.personal;
-  const userEmail = req.body.personal.email;
+  const userEmail = (req.body.personal.email as string).toLowerCase();
   // //console.log('userInput', userInput);
   // //console.log('personalInfo', personalInfo);
   // //console.log('userEmail', userEmail);
@@ -204,7 +204,7 @@ const takeAssessMentt = catchAsync(async (req: Request, res: Response) => {
     [
       {
         email: userEmail,
-        personal: personalInfo,
+        personal: { ...personalInfo, email: userEmail },
         assessment_data: userInput,
         score: {
           uk: ukAssessmentScore,
