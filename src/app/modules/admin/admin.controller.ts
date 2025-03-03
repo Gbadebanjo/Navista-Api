@@ -196,7 +196,8 @@ export const deleteUser = catchAsync(async (req, res) => {
  *             example: "Error creating an admin"
  */
 export const createAdmin = catchAsync(async (req, res) => {
-  const { email, first_name, last_name, password } = req.body;
+  const { first_name, last_name, password } = req.body;
+  const email = req.body.email.toLowerCase();
   const passwdEncrypt = bcrypt.hashSync(password, 10);
 
   const { data, error } = await supabaseAdmin.auth.signUp({
@@ -502,7 +503,7 @@ export const createSuperAdmin = catchAsync(async (req, res) => {
   const { email } = req.body;
 
   const { data, error } = await supabaseAdmin.from('super_admins').insert({
-    email,
+    email: email.toLowerCase(),
   });
 
   if (error) return res.status(401).json({ success: false, error: error.message });
@@ -538,7 +539,7 @@ export const createSuperAdmin = catchAsync(async (req, res) => {
  */
 export const removeAsuperAdmin = catchAsync(async (req, res) => {
   const { email } = req.body;
-  const { data, error } = await supabaseAdmin.from('super_admins').delete().eq('email', email);
+  const { data, error } = await supabaseAdmin.from('super_admins').delete().eq('email', email.toLowerCase());
 
   if (error) return res.status(401).json({ success: false, error: error.message });
 
@@ -593,7 +594,7 @@ export const getAllSuperAdmins = catchAsync(async (req, res) => {
  *         description: Successfully logged in
  */
 export const adminLogin = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body as { email: string; password: string };
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -604,9 +605,9 @@ export const adminLogin = catchAsync(async (req, res) => {
 
   if (error) return res.status(401).json({ error: error.message });
 
-  const checkIfSuperAdmin = await supabaseAdmin.from('super_admins').select('*').eq('email', email);
+  const checkIfSuperAdmin = await supabaseAdmin.from('super_admins').select('*').eq('email', email.toLowerCase());
 
-  const checkIfClientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', email);
+  const checkIfClientAdmin = await supabaseAdmin.from('client_admins').select('*').eq('email', email.toLowerCase());
 
   if (checkIfSuperAdmin.data.length === 0 && checkIfClientAdmin.data.length === 0)
     return res.status(401).json({ error: 'Unauthorized' });
