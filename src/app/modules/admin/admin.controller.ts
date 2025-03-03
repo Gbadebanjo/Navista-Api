@@ -109,6 +109,14 @@ export const getAUser = catchAsync(async (req, res) => {
     .single();
 
   // const documents = documentPaths.data.map((doc) => await supabaseAdmin.storage.from('documents').createSignedUrls);
+  if (!documentPaths.data)
+    return res.status(200).json({
+      status: 'success',
+      data: user.data,
+      user_documents: [],
+      user_assessment: user_assessments.data,
+    });
+
   const documents = await supabaseAdmin.storage.from(config.supabase.bucket_name).createSignedUrls(
     documentPaths.data.map((doc) => doc.file_path),
     Number(config.supabase.document_expiry)
