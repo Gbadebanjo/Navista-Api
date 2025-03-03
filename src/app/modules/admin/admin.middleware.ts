@@ -40,6 +40,8 @@ const authorize =
 
         console.log(data, 'data');
 
+        const superadmin = await supabaseAdmin.from('super_admins').select('*').eq('email', getUser.data.user.email);
+
         if (error) {
           return res.status(httpStatus.UNAUTHORIZED).json({
             success: false,
@@ -56,7 +58,7 @@ const authorize =
           });
         }
 
-        if (data[0].role !== 'client_admin') {
+        if (data[0].role !== 'client_admin' && superadmin.data.length === 0) {
           console.log('You are not authorized');
           return res.status(httpStatus.FORBIDDEN).json({
             success: false,
