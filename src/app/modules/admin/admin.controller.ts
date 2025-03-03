@@ -109,7 +109,7 @@ export const getAUser = catchAsync(async (req, res) => {
     .single();
 
   // const documents = documentPaths.data.map((doc) => await supabaseAdmin.storage.from('documents').createSignedUrls);
-  if (!documentPaths.data)
+  if (!documentPaths.data || documentPaths.data.length === 0)
     return res.status(200).json({
       status: 'success',
       data: user.data,
