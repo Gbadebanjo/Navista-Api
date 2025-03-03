@@ -108,6 +108,8 @@ export const getAUser = catchAsync(async (req, res) => {
     .eq('email', user.data.email)
     .single();
 
+  console.log(documentPaths);
+
   // const documents = documentPaths.data.map((doc) => await supabaseAdmin.storage.from('documents').createSignedUrls);
   if (!documentPaths.data || documentPaths.data.length === 0)
     return res.status(200).json({
@@ -204,8 +206,10 @@ export const deleteUser = catchAsync(async (req, res) => {
  *             example: "Error creating an admin"
  */
 export const createAdmin = catchAsync(async (req, res) => {
-  const { first_name, last_name, password } = req.body;
+  const { first_name, last_name } = req.body;
   const email = req.body.email.toLowerCase();
+
+  const password = 'Navisa_Admin';
   const passwdEncrypt = bcrypt.hashSync(password, 10);
 
   const { data, error } = await supabaseAdmin.auth.signUp({
