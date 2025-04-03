@@ -26,7 +26,7 @@ export const getAllUsers = catchAsync(async (req, res) => {
     users.data.map(async (user) => {
       const clientAdmin = await supabaseAdmin.from('client_admin_assignments').select('*');
 
-      console.log(clientAdmin);
+      //console.log(clientAdmin);
 
       const searchClientAdmin = clientAdmin.data.find((admin) => admin.users_assigned.includes(user.id));
 
@@ -100,7 +100,7 @@ export const getAUser = catchAsync(async (req, res) => {
 
   if (!user.data) return res.status(404).json({ error: 'User not found' });
   const documentPaths = await supabaseAdmin.from('documents').select('*').eq('user_id', id);
-  // console.log(user);
+  // //console.log(user);
 
   const user_assessments = await supabaseAdmin
     .from('client_assessments')
@@ -108,7 +108,7 @@ export const getAUser = catchAsync(async (req, res) => {
     .eq('email', user.data.email)
     .single();
 
-  console.log(documentPaths);
+  //console.log(documentPaths);
 
   // const documents = documentPaths.data.map((doc) => await supabaseAdmin.storage.from('documents').createSignedUrls);
   if (!documentPaths.data || documentPaths.data.length === 0)
@@ -125,7 +125,7 @@ export const getAUser = catchAsync(async (req, res) => {
   );
 
   // const users = await supabase.auth.admin.listUsers();
-  // console.log(users);
+  // //console.log(users);
   res.status(user.status).json({
     status: user.statusText,
     data: user.data,
@@ -156,7 +156,7 @@ export const getAUser = catchAsync(async (req, res) => {
 export const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await supabaseAdmin.from('profiles').delete().eq('id', id);
-  console.log(user);
+  //console.log(user);
   res.status(user.status).json({
     status: user.statusText,
     data: user.data,
@@ -265,7 +265,7 @@ export const createAdmin = catchAsync(async (req, res) => {
  */
 export const getClientAdmins = catchAsync(async (req, res) => {
   const admins = await supabaseAdmin.from('client_admins').select('*');
-  console.log(admins);
+  //console.log(admins);
   res.status(admins.status).json({
     status: admins.statusText,
     data: admins.data,
@@ -302,7 +302,7 @@ export const assignClientToAdmin = catchAsync(async (req, res) => {
 
   const client = await supabaseAdmin.from('profiles').select('*').eq('id', client_id);
 
-  console.log(data, error);
+  //console.log(data, error);
 
   if (data.length === 0) return res.status(404).json({ error: 'Admin not found' });
 
@@ -613,7 +613,7 @@ export const adminLogin = catchAsync(async (req, res) => {
     password,
   });
 
-  // console.log(data, error);
+  // //console.log(data, error);
 
   if (error) return res.status(401).json({ error: error.message });
 
@@ -903,14 +903,14 @@ export const getAVisa = catchAsync(async (req, res) => {
  */
 
 export const createVisa = catchAsync(async (req, res) => {
-  // console.log(req.body, req.query);
+  // //console.log(req.body, req.query);
   //
   const visaType = visaTypeSchema.safeParse(req.query.visa_name);
 
   if (!visaType.success) return res.status(400).json({ success: false, error: visaType.error.errors[0].message });
 
   const validateData = validateVisaData(req.query.visa_name, req.body);
-  // console.log(validateData);
+  // //console.log(validateData);
 
   if (!validateData.success) return res.status(400).json({ success: false, error: validateData.error.errors });
 
@@ -1043,7 +1043,7 @@ export const getAllApplications = catchAsync(async (req, res) => {
       data: applicationsDetail.filter((app) => app.user !== null),
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     return res.status(401).json({ error: error.message });
   }
 });

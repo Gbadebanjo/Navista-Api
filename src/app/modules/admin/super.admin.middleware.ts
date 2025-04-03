@@ -11,7 +11,6 @@ const SuperAdminAuthorize =
       const authorizationHeader = req.headers.authorization;
 
       if (!authorizationHeader) {
-        console.log('No authorization header');
         return res.status(httpStatus.UNAUTHORIZED).json({
           success: false,
           message: 'You are not authorized',
@@ -31,14 +30,10 @@ const SuperAdminAuthorize =
           });
         }
 
-        console.log(getUser);
-
         const { data, error } = await supabaseAdmin
           .from('super_admins')
           .select('*')
           .eq('email', getUser.data.user.email);
-
-        console.log(data);
 
         if (error) {
           return res.status(httpStatus.UNAUTHORIZED).json({
@@ -48,7 +43,6 @@ const SuperAdminAuthorize =
         }
 
         if (!data.length || data.length === 0) {
-          console.log('You are not authorized, You are not a super admin');
           return res.status(httpStatus.UNAUTHORIZED).json({
             success: false,
             message: 'You are not authorized',
@@ -76,14 +70,12 @@ const SuperAdminAuthorize =
         req.body.user = data[0];
         next();
       } catch (error) {
-        console.log('You are not authorized, catch 1', error);
         return res.status(httpStatus.UNAUTHORIZED).json({
           success: false,
           message: 'You are not authorized',
         });
       }
     } catch (error) {
-      console.log('You are not authorized, catch', error);
       next(error);
     }
   };

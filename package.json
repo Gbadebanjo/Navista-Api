@@ -17,29 +17,7 @@
     "prepare": "husky",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ShuvoProgram/express-boilerplate-starter.git"
-  },
-  "keywords": [
-    "typescript",
-    "express",
-    "starter",
-    "boilerplate",
-    "mongoose",
-    "mongodb",
-    "atlas",
-    "eslint",
-    "prettier",
-    "husky",
-    "nodemon"
-  ],
-  "author": "Safar khan Shuvo",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ShuvoProgram/express-boilerplate-starter/issues"
-  },
-  "homepage": "https://github.com/ShuvoProgram/express-boilerplate-starter#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.48.1",
     "@types/cors": "^2.8.17",

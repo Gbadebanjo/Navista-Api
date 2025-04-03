@@ -11,7 +11,7 @@ export type EducationScoring = {
 
 export type FieldMultipliers = {
   STEMDigitalArts: number;
-  BusinessEconomics: number; // ✅ Added Business/Economics
+  BusinessEconomics: number; //  Added Business/Economics
   OtherFields: number;
 };
 

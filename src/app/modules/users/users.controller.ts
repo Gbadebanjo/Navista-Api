@@ -613,6 +613,8 @@ const updateTrackings = catchAsync(async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'User not found' });
   }
 
+  console.log('user-details', user);
+
   try {
     const { data, error } = await supabaseAdmin
       .from('application_trackings')

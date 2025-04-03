@@ -1,14 +1,3 @@
-// User interface
-// export type IUser = {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   role: 'user';
-//   password: string;
-//   passwordConfirm: string | undefined;
-//   passwordChangedAt?: Date;
-// };
-
 export type ILoginUser = {
   email: string;
   password: string;

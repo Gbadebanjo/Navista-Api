@@ -14,11 +14,9 @@ const createToken = (payload: object): string => {
 
 // Function to generate refresh token
 const generateRefreshToken = (payload: Record<string, unknown>): string => {
-  const refreshToken = jwt.sign(
-    { _id: payload._id, role: payload.role },
-    config.jwt.refresh_secret as string,
-    { expiresIn: config.jwt.refresh_expires_in } // Set the refresh token expiry time, e.g., '7d'
-  );
+  const refreshToken = jwt.sign({ _id: payload._id, role: payload.role }, config.jwt.refresh_secret as string, {
+    expiresIn: config.jwt.refresh_expires_in,
+  });
   return refreshToken;
 };
 

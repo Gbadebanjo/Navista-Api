@@ -7,8 +7,6 @@ import SuperAdminAuthorize from './super.admin.middleware';
 const clientAdminRouter = express.Router();
 const supaAdminRouter = express.Router();
 
-// router.use(authorize('admin')); //Admin Middleware  to be  used when admin signup and signin
-
 clientAdminRouter.post('/login', AdminController.adminLogin);
 
 clientAdminRouter.use(authorize('client_admin'));
